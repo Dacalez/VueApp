@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Image searcher</title>
+    <script
+  		src="https://code.jquery.com/jquery-3.3.1.js"
+  		integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+ 		 crossorigin="anonymous"></script>
+ 		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  </head>
+  <body>
+
+    <form id="main" v-cloak>
+        <input type="text" v-model="searchString" placeholder="Busca imagenes"/>
+        <ul>
+            <!-- Loop through the services array, assign a click handler, and set or
+                 remove the "active" css class if needed -->
+            <li v-for="services in filterServices" v-on:click="toggleActive(service)" v-bind:class="{ 'active': service.active}">
+            	<p>{{services.name}}</p>
+            </li>
+        </ul>
+    </form>
+
+    <script>
+
+    // Define a custom filter called "currency".
+    Vue.filter('currency', function (value) {
+        return '$' + value.toFixed(2);
+    });
+
+
+    var demo = new Vue({
+        el: '#main',
+        data: {
+        	searchString: "",
+            services: []
+        },
+        methods: {
+            toggleActive: function(s){
+                s.active = !s.active;
+            }
+        },
+        mounted(){
+			$.getJSON( "https://swapi.co/api/people/", function(peticion) {
+				this.services=peticion.results;
+				console.log(this.services);
+			});
+        },
+        computed: {
+			filterServices: function(){
+
+        	var articles_array = this.services,
+
+            searchString = this.searchString;
+
+            if(!searchString){
+                return articles_array;
+            }
+
+            searchString = searchString.trim().toLowerCase();
+
+            articles_array = articles_array.filter(function(item){
+                if(item.name.toLowerCase().indexOf(searchString) !== -1){
+                    return item;
+                }
+            })
+
+            // Return an array with the filtered data.
+            return articles_array;
+			}
+    }
+  });
+    </script>
+  </body>
+</html>

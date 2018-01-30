@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+    <head>
+    <meta charset="utf-8">
+    <title>Fotos de perros</title>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+
+    <script
+      src="http://code.jquery.com/jquery-3.3.1.js"
+      integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+      crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  </head>
+  <body class="container">
+    <main id="main">
+        <div id="bigImg" class="col-md-5">
+            <img  v-bind:src="imgGrande" alt=""  class="col-md-12"/>
+        </div>
+    <h1 class="text-center">Fotos de perros</h1>
+    <form>
+        <select id="selector" v-on:change="imagenes()" class="center-block">
+            <option :value="undefined">Elija una raza</option>
+            <option v-for="breed in breeds" v-bind:value="breed">
+                {{breed}}
+            </option>
+        </select>
+        <button><i class="fa fa-star" v-on:click="getFavorites" aria-hidden="true"></i></button>
+    </form>
+    <section class="row">
+        <div v-for="images in imagenesGuardadas" class="col-md-3">
+            <img  v-bind:src="images" alt=""  class="col-md-12"/>
+        <div class="col-md-12">
+            <i class="fa fa-plus" v-on:click="plus(images)"  aria-hidden="true"></i>
+            <a v-bind:href="images" download="imagen.jpg">
+                <i class="fa fa-download" aria-hidden="true"></i>
+            </a>
+            <i class="fa fa-star-o" aria-hidden="true"></i>
+        </div>
+        </div>
+    </section>
+    <section class="row">
+    <div v-for="images in images" class="col-md-3">
+        <img  v-bind:src="images" alt=""  class="col-md-12"/>
+        <div class="col-md-12">
+            <i class="fa fa-plus" v-on:click="plus(images)"  aria-hidden="true"></i>
+            <a v-bind:href="images" download="imagen.jpg">
+                <i class="fa fa-download" aria-hidden="true"></i>
+            </a>
+            <i class="fa fa-star-o" v-on:click="saveFavorite(images)" aria-hidden="true"></i>
+        </div>
+    </div>
+    </section>
+    </main>
+  </body>
+  <script>
+      var sw= new Vue({
+        el: '#main',
+        data:{
+            searchString: "",
+            breeds: [],
+            images: [],
+            imagenesGuardadas: [],
+            imgGrande: ""
+        },
+        methods:{
+            imagenes: function(){
+                var selectedOption = document.getElementById("selector").value;
+                axios.get("https://dog.ceo/api/breed/" + selectedOption + "/images")
+                .then(response => {
+                var url= response.data.message;
+                this.images = url.slice(0,16)
+                });
+            },
+            plus: function(url){
+                 this.imgGrande = url;
+            },
+            saveFavorite: function(url){
+                this.imagenesGuardadas.push(url);
+                var savedPhotos = this.imagenesGuardadas;
+                localStorage.setItem('savedPhotos', JSON.stringify(savedPhotos));
+            },
+            getFavorites: function(){
+                var restoredSession = JSON.parse(localStorage.getItem('savedPhotos'));
+                if (restoredSession.length>0) restoredSession = this.imagenesGuardadas;
+
+            }
+        },
+        mounted() {
+        axios.get("https://dog.ceo/api/breeds/list")
+        .then(response => {this.breeds = response.data.message})
+        },
+      });
+  </script>
+</html>
