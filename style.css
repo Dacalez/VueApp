@@ -1,0 +1,24 @@
+#Galeria img{
+	height: 200px;
+}
+
+/*Imagen en grande*/
+#bigImg{
+	position: fixed;
+	top:0px;
+	left: 0px;
+    z-index: 2;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.85);
+    width:100%;
+    display:none;
+    height:100%;
+ }
+
+#bigImg i{
+	color: white;
+	position: absolute;
+    right: 400px;
+    top: 10px;
+}

@@ -4,9 +4,7 @@
     <title>Fotos de perros</title>
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-
-
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script
       src="http://code.jquery.com/jquery-3.3.1.js"
       integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
@@ -14,42 +12,40 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
   </head>
-  <body class="container">
-    <main id="main">
-        <div id="bigImg" class="col-md-5">
-            <img  v-bind:src="imgGrande" alt=""  class="col-md-12"/>
+  <body>
+    <main id="main" class="container">
+    <div id="bigImg">
+            <i class="fa fa-times fa-3x" aria-hidden="true" v-on:click="zoomOut"></i>
+            <img  v-bind:src="imgGrande" alt=""  class="col-md-4"/>
+    </div>
+    <div class="row">
+        <h1 class="text-center col-md-12">Fotos de perros</h1>
+        <div class="text-center col-md-12">
+            <form class="col-md-8 d-inline-block">
+                <select id="selector" v-on:change="imagenes()" class="col-md-12">
+                    <option :value="undefined">Elija una raza</option>
+                    <option v-for="breed in breeds" v-bind:value="breed">
+                        {{breed}}
+                    </option>
+                    </select>
+            </form>
+            <button v-on:click="favoritos" class="">
+                    <i id="fav_menu" class="fa fa-star"  aria-hidden="true"></i>
+            </button>
         </div>
-    <h1 class="text-center">Fotos de perros</h1>
-    <form>
-        <select id="selector" v-on:change="imagenes()" class="center-block">
-            <option :value="undefined">Elija una raza</option>
-            <option v-for="breed in breeds" v-bind:value="breed">
-                {{breed}}
-            </option>
-        </select>
-        <button><i class="fa fa-star" v-on:click="getFavorites" aria-hidden="true"></i></button>
-    </form>
+    </div>
+
+
+
     <section class="row">
-        <div v-for="images in imagenesGuardadas" class="col-md-3">
-            <img  v-bind:src="images" alt=""  class="col-md-12"/>
-        <div class="col-md-12">
-            <i class="fa fa-plus" v-on:click="plus(images)"  aria-hidden="true"></i>
+    <div v-for="images in showFavorite" id="Galeria" class="h-5 col-md-3">
+        <img v-on:click="plus(images)" v-bind:src="images" alt=""  class="col-md-12"/>
+        <div class="col-md-12 text-center">
+            <i class="fa fa-search-plus" v-on:click="plus(images)"  aria-hidden="true"></i>
             <a v-bind:href="images" download="imagen.jpg">
                 <i class="fa fa-download" aria-hidden="true"></i>
             </a>
-            <i class="fa fa-star-o" aria-hidden="true"></i>
-        </div>
-        </div>
-    </section>
-    <section class="row">
-    <div v-for="images in images" class="col-md-3">
-        <img  v-bind:src="images" alt=""  class="col-md-12"/>
-        <div class="col-md-12">
-            <i class="fa fa-plus" v-on:click="plus(images)"  aria-hidden="true"></i>
-            <a v-bind:href="images" download="imagen.jpg">
-                <i class="fa fa-download" aria-hidden="true"></i>
-            </a>
-            <i class="fa fa-star-o" v-on:click="saveFavorite(images)" aria-hidden="true"></i>
+            <i class="fa fa-star-o fav_but" v-on:click="saveFavorite(images)" aria-hidden="true"></i>
         </div>
     </div>
     </section>
@@ -59,11 +55,12 @@
       var sw= new Vue({
         el: '#main',
         data:{
-            searchString: "",
             breeds: [],
+            imagenesMostrar:[],
             images: [],
             imagenesGuardadas: [],
-            imgGrande: ""
+            imgGrande: "",
+            favorite: false
         },
         methods:{
             imagenes: function(){
@@ -76,19 +73,47 @@
             },
             plus: function(url){
                  this.imgGrande = url;
+                 var zoom = document.getElementById("bigImg");
+                 zoom.style.display = "flex";
             },
             saveFavorite: function(url){
                 this.imagenesGuardadas.push(url);
-                var savedPhotos = this.imagenesGuardadas;
-                localStorage.setItem('savedPhotos', JSON.stringify(savedPhotos));
+                localStorage.setItem('imagenesPerros', JSON.stringify(this.imagenesGuardadas));
+                
             },
-            getFavorites: function(){
-                var restoredSession = JSON.parse(localStorage.getItem('savedPhotos'));
-                if (restoredSession.length>0) restoredSession = this.imagenesGuardadas;
+            favoritos: function(){
+                this.favorite = !this.favorite;
+                var restoredSession = JSON.parse(localStorage.getItem('imagenesPerros'));
+                if (restoredSession.length>0) this.imagenesGuardadas=restoredSession;
+
+
+            },
+            zoomOut: function(){
+                var zoom = document.getElementById("bigImg");
+                 zoom.style.display = "none";
+            }
+        },
+        computed:{
+            showFavorite: function(){
+                var array_im = this.imagenesGuardadas;
+                var selectedOption = document.getElementById("selector");
+                if(this.favorite==false){
+                    array_im = this.images;
+                    selectedOption.style.display="inline-block";
+                    document.getElementById("fav_menu").classList.remove('fa-times');
+                    document.getElementById("fav_menu").classList.add('fa-star');
+                    return array_im
+                }else{
+                    array_im = this.imagenesGuardadas;
+                    selectedOption.style.display="none";
+                    document.getElementById("fav_menu").classList.remove('fa-star');
+                    document.getElementById("fav_menu").classList.add('fa-times'); 
+                    return array_im
+                }
 
             }
         },
-        mounted() {
+       created: function() {
         axios.get("https://dog.ceo/api/breeds/list")
         .then(response => {this.breeds = response.data.message})
         },
